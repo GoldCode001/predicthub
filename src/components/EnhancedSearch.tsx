@@ -199,7 +199,7 @@ export default function EnhancedSearch({
       {/* No results state */}
       {query && totalResults === 0 && (
         <div className="absolute top-full left-0 right-0 mt-2 p-5 bg-ph-card border border-subtle rounded-xl shadow-card z-50 text-center animate-fadeIn">
-          <p className="text-ph-text-secondary mb-2">No markets found for '{query}'</p>
+          <p className="text-ph-text-secondary mb-2">No markets found for &apos;{query}&apos;</p>
           <p className="text-xs text-ph-text-muted">Try searching for:</p>
           <div className="flex flex-wrap justify-center gap-2 mt-3">
             {POPULAR_SEARCHES.slice(0, 4).map((search, i) => (

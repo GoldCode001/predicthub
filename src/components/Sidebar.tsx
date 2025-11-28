@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { ReactNode } from 'react';
 import { Platform, platformNames, PlatformStatus } from '@/types/market';
 import WalletButton from './WalletButton';
@@ -55,10 +56,12 @@ export default function Sidebar({
       <div className="p-5 border-b border-subtle">
         <div className="flex items-center gap-3 mb-5">
           <div className="w-10 h-10 rounded-xl bg-gradient-premium flex items-center justify-center shadow-glow-blue overflow-hidden">
-            <img
+            <Image
               src="/@favicon.svg"
               alt="PredictHub logo"
-              className="w-10 h-10 object-cover"
+              width={40}
+              height={40}
+              className="object-cover"
             />
           </div>
           <div>

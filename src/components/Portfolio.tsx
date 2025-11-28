@@ -59,7 +59,7 @@ interface PlatformStatus {
 
 export default function Portfolio() {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const [activePlatforms, setActivePlatforms] = useState<Set<PlatformType>>(new Set(['polymarket', 'manifold']));
+  const [activePlatforms, setActivePlatforms] = useState(new Set(['polymarket', 'manifold']));
   const [platformData, setPlatformData] = useState<Record<PlatformType, PlatformStatus>>({
     polymarket: { loading: false, error: null, positions: [], connected: false },
     kalshi: { loading: false, error: null, positions: [], connected: false },

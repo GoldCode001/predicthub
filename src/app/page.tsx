@@ -1,0 +1,501 @@
+'use client';
+
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { 
+  UnifiedMarket, 
+  Platform, 
+  Category,
+  PlatformStatus,
+} from '@/types/market';
+import Sidebar from '@/components/Sidebar';
+import MobileNav from '@/components/MobileNav';
+import MarketTable from '@/components/MarketTable';
+import FilterBar, { SortField, SortDirection } from '@/components/FilterBar';
+import Portfolio from '@/components/Portfolio';
+import QuickStats from '@/components/QuickStats';
+import TrendingSection from '@/components/TrendingSection';
+import ArbitrageSection from '@/components/ArbitrageSection';
+import MarketDetailModal from '@/components/MarketDetailModal';
+import AlertModal, { Alert } from '@/components/AlertModal';
+import EnhancedSearch from '@/components/EnhancedSearch';
+import PremiumBanner from '@/components/PremiumBanner';
+import AdvancedFilters, { FilterState } from '@/components/AdvancedFilters';
+import AlertsPanel from '@/components/AlertsPanel';
+import PlatformLogo from '@/components/PlatformLogo';
+import { findArbitrageOpportunities, ArbitrageOpportunity } from '@/utils/arbitrage';
+
+const ALL_PLATFORMS: Platform[] = ['polymarket', 'kalshi', 'manifold', 'metaculus'];
+const ALL_CATEGORIES: Category[] = ['politics', 'crypto', 'sports', 'technology', 'economics', 'science', 'entertainment', 'world', 'other'];
+
+interface PlatformResponse {
+  markets: UnifiedMarket[];
+  error: string | null;
+}
+
+export default function Home() {
+  const [allMarkets, setAllMarkets] = useState<UnifiedMarket[]>([]);
+  const [platformStatus, setPlatformStatus] = useState<Record<Platform, PlatformStatus>>(() => {
+    const initial: Record<Platform, PlatformStatus> = {} as Record<Platform, PlatformStatus>;
+    ALL_PLATFORMS.forEach(p => {
+      initial[p] = { platform: p, loading: true, error: null, marketCount: 0 };
+    });
+    return initial;
+  });
+
+  // Basic filters
+  const [searchQuery, setSearchQuery] = useState('');
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [activePlatforms, setActivePlatforms] = useState<Set<Platform>>(new Set(ALL_PLATFORMS));
+  const [activeCategory, setActiveCategory] = useState<Category | 'all'>('all');
+  const [sortField, setSortField] = useState<SortField>('volume');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [activeTab, setActiveTab] = useState<'markets' | 'portfolio'>('markets');
+
+  // Advanced filters
+  const [advancedFilters, setAdvancedFilters] = useState<FilterState>({
+    volumeRange: [0, 10000000],
+    probabilityRange: [0, 100],
+    endingWithin: 'all',
+    categories: new Set(ALL_CATEGORIES),
+  });
+
+  // Modals
+  const [selectedMarket, setSelectedMarket] = useState<UnifiedMarket | null>(null);
+  const [alertMarket, setAlertMarket] = useState<UnifiedMarket | null>(null);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+
+  // Arbitrage opportunities
+  const [arbitrageOpportunities, setArbitrageOpportunities] = useState<ArbitrageOpportunity[]>([]);
+
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Load alerts from localStorage
+  useEffect(() => {
+    const savedAlerts = localStorage.getItem('price_alerts');
+    if (savedAlerts) {
+      try {
+        setAlerts(JSON.parse(savedAlerts));
+      } catch (e) {
+        // Invalid JSON
+      }
+    }
+  }, []);
+
+  // Save alerts to localStorage
+  useEffect(() => {
+    localStorage.setItem('price_alerts', JSON.stringify(alerts));
+  }, [alerts]);
+
+  // Fetch from a single platform
+  const fetchPlatform = useCallback(async (platform: Platform) => {
+    setPlatformStatus(prev => ({
+      ...prev,
+      [platform]: { ...prev[platform], loading: true, error: null }
+    }));
+
+    try {
+      const response = await fetch(`/api/markets/${platform}`);
+      const data: PlatformResponse = await response.json();
+
+      setPlatformStatus(prev => ({
+        ...prev,
+        [platform]: {
+          platform,
+          loading: false,
+          error: data.error,
+          marketCount: data.markets?.length || 0
+        }
+      }));
+
+      if (data.markets && data.markets.length > 0) {
+        setAllMarkets(prev => {
+          const filtered = prev.filter(m => m.platform !== platform);
+          return [...filtered, ...data.markets];
+        });
+      }
+    } catch (error) {
+      setPlatformStatus(prev => ({
+        ...prev,
+        [platform]: {
+          platform,
+          loading: false,
+          error: error instanceof Error ? error.message : 'Failed to fetch',
+          marketCount: 0
+        }
+      }));
+    }
+  }, []);
+
+  // Fetch all platforms on mount
+  useEffect(() => {
+    ALL_PLATFORMS.forEach(platform => {
+      fetchPlatform(platform);
+    });
+  }, [fetchPlatform]);
+
+  // Calculate arbitrage opportunities when markets change
+  useEffect(() => {
+    if (allMarkets.length > 0) {
+      const opportunities = findArbitrageOpportunities(allMarkets, 3);
+      setArbitrageOpportunities(opportunities);
+    }
+  }, [allMarkets]);
+
+  // Check alerts
+  useEffect(() => {
+    const checkAlerts = () => {
+      const updatedAlerts = alerts.map(alert => {
+        if (alert.triggered) return alert;
+        
+        const market = allMarkets.find(m => m.id === alert.marketId);
+        if (!market) return alert;
+
+        const triggered = alert.condition === 'above' 
+          ? market.probability >= alert.threshold
+          : market.probability <= alert.threshold;
+
+        if (triggered && 'Notification' in window && Notification.permission === 'granted') {
+          new Notification('PredictHub Price Alert', {
+            body: `${market.question} is now at ${market.probability.toFixed(1)}%`,
+            icon: '/favicon.ico',
+          });
+        }
+
+        return { ...alert, triggered };
+      });
+
+      if (JSON.stringify(updatedAlerts) !== JSON.stringify(alerts)) {
+        setAlerts(updatedAlerts);
+      }
+    };
+
+    checkAlerts();
+  }, [allMarkets, alerts]);
+
+  // Toggle platform filter
+  const handlePlatformToggle = useCallback((platform: Platform) => {
+    setActivePlatforms(prev => {
+      const next = new Set(prev);
+      if (next.has(platform)) {
+        next.delete(platform);
+      } else {
+        next.add(platform);
+      }
+      return next;
+    });
+  }, []);
+
+  // Handle sort change
+  const handleSortChange = useCallback((field: SortField) => {
+    if (field === sortField) {
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('desc');
+    }
+  }, [sortField]);
+
+  // Add alert
+  const handleAddAlert = useCallback((alert: Alert) => {
+    setAlerts(prev => [...prev, alert]);
+  }, []);
+
+  // Delete alert
+  const handleDeleteAlert = useCallback((id: string) => {
+    setAlerts(prev => prev.filter(a => a.id !== id));
+  }, []);
+
+  // Calculate category counts
+  const categoryCounts = useMemo(() => {
+    const counts: Record<Category | 'all', number> = { all: 0 } as Record<Category | 'all', number>;
+    ALL_CATEGORIES.forEach(c => counts[c] = 0);
+    
+    allMarkets
+      .filter(m => activePlatforms.has(m.platform))
+      .forEach(m => {
+        counts[m.category] = (counts[m.category] || 0) + 1;
+        counts['all']++;
+      });
+    
+    return counts;
+  }, [allMarkets, activePlatforms]);
+
+  // Filter and sort markets
+  const filteredMarkets = useMemo(() => {
+    let result = allMarkets;
+
+    // Platform filter
+    result = result.filter(m => activePlatforms.has(m.platform));
+
+    // Category filter (basic)
+    if (activeCategory !== 'all') {
+      result = result.filter(m => m.category === activeCategory);
+    }
+
+    // Advanced filters
+    result = result.filter(m => {
+      // Volume range
+      if (m.volume < advancedFilters.volumeRange[0] || m.volume > advancedFilters.volumeRange[1]) {
+        return false;
+      }
+
+      // Probability range
+      if (m.probability < advancedFilters.probabilityRange[0] || m.probability > advancedFilters.probabilityRange[1]) {
+        return false;
+      }
+
+      // Ending within
+      if (advancedFilters.endingWithin !== 'all' && m.endDate) {
+        const endDate = new Date(m.endDate);
+        const now = new Date();
+        const diffHours = (endDate.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+        if (advancedFilters.endingWithin === '24h' && diffHours > 24) return false;
+        if (advancedFilters.endingWithin === 'week' && diffHours > 24 * 7) return false;
+        if (advancedFilters.endingWithin === 'month' && diffHours > 24 * 30) return false;
+      }
+
+      // Categories
+      if (!advancedFilters.categories.has(m.category)) {
+        return false;
+      }
+
+      return true;
+    });
+
+    // Search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(m => 
+        m.question.toLowerCase().includes(query)
+      );
+    }
+
+    // Sort
+    result = [...result].sort((a, b) => {
+      let comparison = 0;
+      
+      switch (sortField) {
+        case 'volume':
+          comparison = a.volume - b.volume;
+          break;
+        case 'probability':
+          comparison = a.probability - b.probability;
+          break;
+        case 'endDate':
+          const dateA = a.endDate ? new Date(a.endDate).getTime() : Infinity;
+          const dateB = b.endDate ? new Date(b.endDate).getTime() : Infinity;
+          comparison = dateA - dateB;
+          break;
+        case 'platform':
+          comparison = a.platform.localeCompare(b.platform);
+          break;
+      }
+
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+
+    return result;
+  }, [allMarkets, activePlatforms, activeCategory, searchQuery, sortField, sortDirection, advancedFilters]);
+
+  // Find similar markets for selected market
+  const similarMarkets = useMemo(() => {
+    if (!selectedMarket) return [];
+    return allMarkets
+      .filter(m => 
+        m.id !== selectedMarket.id && 
+        m.platform !== selectedMarket.platform &&
+        m.category === selectedMarket.category
+      )
+      .slice(0, 5);
+  }, [selectedMarket, allMarkets]);
+
+  // Check if market has arbitrage opportunity
+  const hasArbitrage = useCallback((marketId: string) => {
+    return arbitrageOpportunities.some(opp => 
+      opp.markets.some(m => m.market.id === marketId)
+    );
+  }, [arbitrageOpportunities]);
+
+  const isAnyLoading = Object.values(platformStatus).some(s => s.loading);
+
+  return (
+    <div className="min-h-screen bg-ph-bg bg-pattern">
+      {/* Quick Stats Bar */}
+      <div className="lg:ml-[280px]">
+        <QuickStats markets={allMarkets} platformStatus={platformStatus} />
+      </div>
+
+      {/* Sidebar - Desktop */}
+      <Sidebar
+        platforms={ALL_PLATFORMS}
+        activePlatforms={activePlatforms}
+        platformStatus={platformStatus}
+        onToggle={handlePlatformToggle}
+        totalMarkets={allMarkets.length}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        advancedFilters={
+          <AdvancedFilters
+            filters={advancedFilters}
+            onChange={setAdvancedFilters}
+            totalMarkets={allMarkets.length}
+            filteredCount={filteredMarkets.length}
+          />
+        }
+        alertsPanel={
+          <AlertsPanel alerts={alerts} onDeleteAlert={handleDeleteAlert} />
+        }
+      />
+
+      {/* Mobile Navigation */}
+      <MobileNav
+        platforms={ALL_PLATFORMS}
+        activePlatforms={activePlatforms}
+        platformStatus={platformStatus}
+        onToggle={handlePlatformToggle}
+        totalMarkets={allMarkets.length}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      />
+
+      {/* Main Content */}
+      <main className="lg:ml-[280px] min-h-screen">
+        {/* Top Bar */}
+        <div className="sticky top-0 z-40 bg-ph-bg/95 backdrop-blur-sm border-b border-subtle pt-[60px] lg:pt-0">
+          <div className="px-4 lg:px-6 py-4">
+            {activeTab === 'markets' && (
+              <>
+                {/* Enhanced Search */}
+                <div className="mb-4">
+                  <EnhancedSearch
+                    onSearch={setSearchQuery}
+                    placeholder="Search markets, questions, topics..."
+                    recentSearches={recentSearches}
+                    onRecentSearchesChange={setRecentSearches}
+                    totalResults={searchQuery ? filteredMarkets.length : undefined}
+                  />
+                </div>
+
+                {/* Filters */}
+                <FilterBar
+                  categories={ALL_CATEGORIES}
+                  activeCategory={activeCategory}
+                  onCategoryChange={setActiveCategory}
+                  sortField={sortField}
+                  sortDirection={sortDirection}
+                  onSortChange={handleSortChange}
+                  marketCounts={categoryCounts}
+                />
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="px-4 lg:px-6 py-6">
+          {activeTab === 'markets' ? (
+            <>
+              {/* Premium Banner */}
+              <PremiumBanner />
+
+              {/* Arbitrage Opportunities */}
+              {arbitrageOpportunities.length > 0 && (
+                <ArbitrageSection
+                  opportunities={arbitrageOpportunities}
+                  onMarketClick={(marketId) => {
+                    const market = allMarkets.find(m => m.id === marketId);
+                    if (market) setSelectedMarket(market);
+                  }}
+                />
+              )}
+
+              {/* Trending Section */}
+              {!searchQuery && allMarkets.length > 0 && (
+                <TrendingSection 
+                  markets={allMarkets} 
+                  onMarketClick={setSelectedMarket}
+                />
+              )}
+
+              {/* Markets Table */}
+              {isAnyLoading && allMarkets.length === 0 ? (
+                <div className="space-y-3">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="shimmer h-24 rounded-xl" />
+                  ))}
+                </div>
+              ) : (
+                <MarketTable 
+                  markets={filteredMarkets}
+                  searchQuery={searchQuery}
+                  onMarketClick={setSelectedMarket}
+                  onSetAlert={setAlertMarket}
+                  hasArbitrage={hasArbitrage}
+                />
+              )}
+            </>
+          ) : (
+            <Portfolio />
+          )}
+        </div>
+
+        {/* Footer */}
+        <footer className="px-4 lg:px-6 py-8 border-t border-subtle">
+          {/* Data from section */}
+          <div className="mb-6 text-center">
+            <p className="text-xs text-ph-text-muted mb-3 font-medium uppercase tracking-wider">Data from</p>
+            <div className="flex items-center justify-center gap-6">
+              {ALL_PLATFORMS.map(platform => (
+                <PlatformLogo 
+                  key={platform} 
+                  platform={platform} 
+                  size="lg" 
+                  showName={true}
+                  linkToSite={true}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-ph-text-muted pt-6 border-t border-subtle">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-gradient-premium flex items-center justify-center shadow-glow-blue">
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+              </div>
+              <span className="font-bold text-ph-text gradient-text text-lg">PredictHub</span>
+            </div>
+            <p className="text-xs text-ph-text-muted text-center max-w-md">
+              PredictHub is an independent aggregator. Not affiliated with any platform. 
+              Market data is for informational purposes only.
+            </p>
+          </div>
+        </footer>
+      </main>
+
+      {/* Market Detail Modal */}
+      {selectedMarket && (
+        <MarketDetailModal
+          market={selectedMarket}
+          similarMarkets={similarMarkets}
+          onClose={() => setSelectedMarket(null)}
+          onSetAlert={setAlertMarket}
+        />
+      )}
+
+      {/* Alert Modal */}
+      {alertMarket && (
+        <AlertModal
+          market={alertMarket}
+          onClose={() => setAlertMarket(null)}
+          onSave={handleAddAlert}
+        />
+      )}
+    </div>
+  );
+}

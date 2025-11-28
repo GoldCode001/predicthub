@@ -1,0 +1,224 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Background colors */
+  --bg-main: #0a0e27;
+  --bg-card: #141b2d;
+  --bg-hover: #1a2332;
+  
+  /* Accent colors */
+  --accent-primary: #3b82f6;
+  --accent-secondary: #8b5cf6;
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  
+  /* Text colors */
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  
+  /* Semantic colors */
+  --color-profit: #22c55e;
+  --color-loss: #ef4444;
+  --color-warning: #f59e0b;
+  --color-info: #3b82f6;
+  
+  /* Platform colors */
+  --polymarket: #8b5cf6;
+  --kalshi: #3b82f6;
+  --manifold: #22c55e;
+  --metaculus: #f59e0b;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg-main);
+  color: var(--text-primary);
+  overflow-anchor: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-hover);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2a3548;
+}
+
+/* Gradient text utility */
+.gradient-text {
+  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Hero gradient */
+.hero-gradient {
+  background: radial-gradient(ellipse at top, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+              radial-gradient(ellipse at bottom right, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+}
+
+/* Card hover effect */
+.card-hover {
+  transition: all 0.2s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  background: var(--bg-hover);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Shimmer loading animation */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--bg-card) 0%,
+    var(--bg-hover) 50%,
+    var(--bg-card) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Pulse glow for important elements */
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+  50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.5); }
+}
+
+.pulse-glow {
+  animation: pulseGlow 2s infinite;
+}
+
+/* Tabular numbers for stats */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Premium button gradient */
+.btn-premium {
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  transition: all 0.2s ease;
+}
+
+.btn-premium:hover {
+  filter: brightness(1.1);
+  transform: scale(1.02);
+}
+
+/* Platform logo styles */
+.platform-logo {
+  transition: all 0.2s ease;
+}
+
+.platform-logo:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+/* Sidebar styling */
+.sidebar {
+  background: var(--bg-card);
+  border-right: 1px solid var(--border-subtle);
+}
+
+/* Table row hover */
+.table-row-hover:hover {
+  background: rgba(59, 130, 246, 0.08);
+}
+
+/* Input focus ring */
+.input-focus {
+  transition: all 0.2s ease;
+}
+
+.input-focus:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  outline: none;
+}
+
+/* Arbitrage glow */
+.arbitrage-glow {
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.2), inset 0 0 30px rgba(239, 68, 68, 0.05);
+}
+
+/* Modal backdrop */
+.modal-backdrop {
+  backdrop-filter: blur(8px);
+  background: rgba(10, 14, 39, 0.8);
+}
+
+/* Number counting animation */
+@keyframes countUp {
+  from { opacity: 0.5; }
+  to { opacity: 1; }
+}
+
+.count-up {
+  animation: countUp 0.3s ease-out;
+}
+
+/* Background pattern */
+.bg-pattern {
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.03) 0%, transparent 50%);
+}
+
+/* Zebra striping for tables */
+.zebra-row:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Profit/Loss colors */
+.text-profit { color: var(--color-profit); }
+.text-loss { color: var(--color-loss); }
+.text-warning { color: var(--color-warning); }
+
+.bg-profit { background-color: rgba(34, 197, 94, 0.1); }
+.bg-loss { background-color: rgba(239, 68, 68, 0.1); }

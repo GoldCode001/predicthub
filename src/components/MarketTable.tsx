@@ -199,7 +199,7 @@ export default function MarketTable({
         <div className="flex items-center justify-between">
           <span className="text-sm font-semibold text-ph-text">
             {markets.length.toLocaleString()} market{markets.length !== 1 ? 's' : ''}
-            {searchQuery && <span className="text-ph-text-secondary"> matching "{searchQuery}"</span>}
+            {searchQuery && <span className="text-ph-text-secondary"> matching '{searchQuery}'</span>}
           </span>
           <div className="hidden md:flex items-center gap-4 text-xs text-ph-text-muted">
             <span className="flex items-center gap-1.5">

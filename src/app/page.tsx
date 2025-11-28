@@ -27,6 +27,13 @@ import { findArbitrageOpportunities, ArbitrageOpportunity } from '@/utils/arbitr
 const ALL_PLATFORMS: Platform[] = ['polymarket', 'kalshi', 'manifold', 'metaculus'];
 const ALL_CATEGORIES: Category[] = ['politics', 'crypto', 'sports', 'technology', 'economics', 'science', 'entertainment', 'world', 'other'];
 
+const PLATFORM_ENDPOINTS: { platform: Platform; url: string }[] = [
+  { platform: 'polymarket', url: '/api/markets/polymarket' },
+  { platform: 'kalshi', url: '/api/markets/kalshi' },
+  { platform: 'manifold', url: '/api/markets/manifold' },
+  { platform: 'metaculus', url: '/api/markets/metaculus' },
+];
+
 interface PlatformResponse {
   markets: UnifiedMarket[];
   error: string | null;
@@ -89,52 +96,78 @@ export default function Home() {
     localStorage.setItem('price_alerts', JSON.stringify(alerts));
   }, [alerts]);
 
-  // Fetch from a single platform
-  const fetchPlatform = useCallback(async (platform: Platform) => {
-    setPlatformStatus(prev => ({
-      ...prev,
-      [platform]: { ...prev[platform], loading: true, error: null }
-    }));
+// Fetch all platforms concurrently on mount
+useEffect(() => {
+  let cancelled = false;
 
-    try {
-      const response = await fetch(`/api/markets/${platform}`);
-      const data: PlatformResponse = await response.json();
-
-      setPlatformStatus(prev => ({
-        ...prev,
-        [platform]: {
-          platform,
-          loading: false,
-          error: data.error,
-          marketCount: data.markets?.length || 0
-        }
-      }));
-
-      if (data.markets && data.markets.length > 0) {
-        setAllMarkets(prev => {
-          const filtered = prev.filter(m => m.platform !== platform);
-          return [...filtered, ...data.markets];
-        });
-      }
-    } catch (error) {
-      setPlatformStatus(prev => ({
-        ...prev,
-        [platform]: {
-          platform,
-          loading: false,
-          error: error instanceof Error ? error.message : 'Failed to fetch',
-          marketCount: 0
-        }
-      }));
-    }
-  }, []);
-
-  // Fetch all platforms on mount
-  useEffect(() => {
-    ALL_PLATFORMS.forEach(platform => {
-      fetchPlatform(platform);
+  const loadMarkets = async () => {
+    const loadingStatus: Record<Platform, PlatformStatus> = {} as Record<Platform, PlatformStatus>;
+    PLATFORM_ENDPOINTS.forEach(({ platform }) => {
+      loadingStatus[platform] = {
+        platform,
+        loading: true,
+        error: null,
+        marketCount: 0,
+      };
     });
-  }, [fetchPlatform]);
+    setPlatformStatus(loadingStatus);
+
+    const responses = await Promise.allSettled(
+      PLATFORM_ENDPOINTS.map(({ platform, url }) =>
+        fetch(url).then(async (res) => ({
+          platform,
+          ok: res.ok,
+          data: (await res.json()) as PlatformResponse,
+        }))
+      )
+    );
+
+    if (cancelled) return;
+
+    const aggregatedMarkets: UnifiedMarket[] = [];
+    const nextStatus: Record<Platform, PlatformStatus> = {} as Record<Platform, PlatformStatus>;
+
+    responses.forEach((result, index) => {
+      const { platform } = PLATFORM_ENDPOINTS[index];
+
+      if (result.status === 'fulfilled' && result.value.ok) {
+        const markets = Array.isArray(result.value.data?.markets) ? result.value.data.markets : [];
+        aggregatedMarkets.push(...markets);
+        nextStatus[platform] = {
+          platform,
+          loading: false,
+          error: result.value.data?.error,
+          marketCount: markets.length,
+        };
+      } else if (result.status === 'fulfilled') {
+        nextStatus[platform] = {
+          platform,
+          loading: false,
+          error: result.value.data?.error || 'Failed to fetch markets',
+          marketCount: 0,
+        };
+      } else {
+        nextStatus[platform] = {
+          platform,
+          loading: false,
+          error: result.reason instanceof Error ? result.reason.message : 'Failed to fetch markets',
+          marketCount: 0,
+        };
+      }
+    });
+
+    if (!cancelled) {
+      setPlatformStatus(nextStatus);
+      setAllMarkets(aggregatedMarkets);
+    }
+  };
+
+  loadMarkets();
+
+  return () => {
+    cancelled = true;
+  };
+}, []);
 
   // Calculate arbitrage opportunities when markets change
   useEffect(() => {

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <!-- Blue circular background -->
+  <circle cx="60" cy="60" r="60" fill="#2150ff"/>
+  <!-- White geometric symbol (stacked V's) -->
+  <g fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Left vertical bar -->
+    <line x1="35" y1="25" x2="35" y2="95"/>
+    <!-- Top V -->
+    <path d="M35 35 L50 25 L65 35"/>
+    <!-- Middle V -->
+    <path d="M35 60 L50 50 L65 60"/>
+    <!-- Bottom V -->
+    <path d="M35 85 L50 75 L65 85"/>
+  </g>
+</svg>
+

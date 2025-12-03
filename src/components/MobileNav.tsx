@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState } from 'react';
 import { Platform, platformNames, PlatformStatus } from '@/types/market';
 import WalletButton from './WalletButton';
@@ -32,10 +33,14 @@ export default function MobileNav({
     <div className="lg:hidden fixed top-0 left-0 right-0 bg-ph-card/95 backdrop-blur-sm border-b border-subtle z-50">
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-premium flex items-center justify-center shadow-glow-blue">
-            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-            </svg>
+          <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center">
+            <Image
+              src="/@favicon.svg"
+              alt="PredictHub logo"
+              width={32}
+              height={32}
+              className="object-cover"
+            />
           </div>
           <span className="text-lg font-bold gradient-text">PredictHub</span>
         </div>
@@ -97,10 +102,10 @@ export default function MobileNav({
       {isOpen && (
         <>
           <div 
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[99]"
             onClick={() => setIsOpen(false)}
           />
-          <div className="fixed right-0 top-0 h-full w-80 bg-ph-card border-l border-subtle z-50 overflow-y-auto animate-fadeIn">
+          <div className="fixed right-0 top-0 h-full w-80 bg-ph-card border-l border-subtle z-[100] overflow-y-auto animate-fadeIn">
             <div className="p-4 border-b border-subtle flex items-center justify-between">
               <span className="font-bold text-ph-text">Filters</span>
               <button 

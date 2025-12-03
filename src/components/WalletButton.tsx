@@ -221,7 +221,7 @@ export default function WalletButton() {
               <div className="p-5 text-center">
                 <p className="text-sm text-ph-text-secondary mb-3">No wallet detected</p>
                 <a
-                  href="https://metamask.io/download/"
+                  href="https://link.zerion.io/referral?code=19NY21O03"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm text-ph-primary hover:underline font-medium"

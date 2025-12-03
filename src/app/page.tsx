@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import Image from 'next/image';
 import { 
   UnifiedMarket, 
   Platform, 
@@ -373,7 +374,7 @@ useEffect(() => {
   return (
     <div className="min-h-screen bg-ph-bg bg-pattern">
       {/* Quick Stats Bar */}
-      <div className="lg:ml-[280px]">
+      <div className="pt-[120px] lg:pt-0 lg:ml-[280px]">
         <QuickStats markets={allMarkets} platformStatus={platformStatus} />
       </div>
 
@@ -536,10 +537,14 @@ useEffect(() => {
 
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-ph-text-muted pt-6 border-t border-subtle">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-gradient-premium flex items-center justify-center shadow-glow-blue">
-                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
+              <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center">
+                <Image
+                  src="/@favicon.svg"
+                  alt="PredictHub logo"
+                  width={32}
+                  height={32}
+                  className="object-cover"
+                />
               </div>
               <span className="font-bold text-ph-text gradient-text text-lg">PredictHub</span>
             </div>

@@ -33,31 +33,31 @@ export interface PlatformStatus {
   marketCount: number;
 }
 
-// Platform colors for badges
+// Platform colors for badges - updated to match actual logo colors
 export const platformColors: Record<Platform, { bg: string; text: string; border: string; glow: string }> = {
   polymarket: {
-    bg: 'bg-purple-500/20',
-    text: 'text-purple-400',
-    border: 'border-purple-500/30',
-    glow: 'rgba(168, 85, 247, 0.15)',
+    bg: 'bg-blue-500/20',
+    text: 'text-blue-500',
+    border: 'border-blue-500/30',
+    glow: 'rgba(33, 80, 255, 0.15)', // #2150ff
   },
   kalshi: {
-    bg: 'bg-blue-500/20',
-    text: 'text-blue-400',
-    border: 'border-blue-500/30',
-    glow: 'rgba(59, 130, 246, 0.15)',
+    bg: 'bg-teal-500/20',
+    text: 'text-teal-500',
+    border: 'border-teal-500/30',
+    glow: 'rgba(20, 184, 166, 0.15)', // #14b8a6
   },
   manifold: {
-    bg: 'bg-emerald-500/20',
-    text: 'text-emerald-400',
-    border: 'border-emerald-500/30',
-    glow: 'rgba(16, 185, 129, 0.15)',
+    bg: 'bg-purple-500/20',
+    text: 'text-purple-500',
+    border: 'border-purple-500/30',
+    glow: 'rgba(139, 92, 246, 0.15)', // #8b5cf6
   },
   metaculus: {
-    bg: 'bg-orange-500/20',
-    text: 'text-orange-400',
-    border: 'border-orange-500/30',
-    glow: 'rgba(249, 115, 22, 0.15)',
+    bg: 'bg-slate-500/20',
+    text: 'text-slate-400',
+    border: 'border-slate-500/30',
+    glow: 'rgba(74, 85, 104, 0.15)', // #4a5568 (dark blue-grey)
   },
 };
 

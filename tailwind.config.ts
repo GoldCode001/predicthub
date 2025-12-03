@@ -32,11 +32,11 @@ const config: Config = {
         'ph-warning': '#f59e0b',
         'ph-info': '#3b82f6',
         
-        // Platform colors
-        'polymarket': '#8b5cf6',
-        'kalshi': '#3b82f6',
-        'manifold': '#22c55e',
-        'metaculus': '#f59e0b',
+        // Platform colors - updated to match actual logo colors
+        'polymarket': '#2150ff', // Royal blue from Polymarket logo
+        'kalshi': '#14b8a6', // Teal-green from Kalshi logo
+        'manifold': '#8b5cf6', // Purple from Manifold crane logo
+        'metaculus': '#4a5568', // Dark blue-grey from Metaculus logo
       },
       borderColor: {
         'subtle': 'rgba(255, 255, 255, 0.1)',

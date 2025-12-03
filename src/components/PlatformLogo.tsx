@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { Platform } from '@/types/market';
 
 interface PlatformLogoProps {
@@ -38,48 +39,19 @@ const textSizes = {
   xl: 'text-lg',
 };
 
-// SVG Logos for each platform
-const PolymarketLogo = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 2L2 7l10 5 10-5-10-5z" fill="currentColor" fillOpacity="0.9"/>
-    <path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-const KalshiLogo = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="2"/>
-    <path d="M8 8v8M8 12h4l4-4M12 12l4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-const ManifoldLogo = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 2L2 7v10l10 5 10-5V7L12 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M12 22V12M2 7l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-const MetaculusLogo = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-    <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <circle cx="12" cy="12" r="2" fill="currentColor"/>
-  </svg>
-);
-
-const logoComponents: Record<Platform, React.FC<{ className?: string }>> = {
-  polymarket: PolymarketLogo,
-  kalshi: KalshiLogo,
-  manifold: ManifoldLogo,
-  metaculus: MetaculusLogo,
+const logoPaths: Record<Platform, string> = {
+  polymarket: '/logos/polymarket.svg',
+  kalshi: '/logos/kalshi.svg',
+  manifold: '/logos/manifold.svg',
+  metaculus: '/logos/metaculus.svg',
 };
 
+// Updated theme colors based on actual logos
 const platformColors: Record<Platform, string> = {
-  polymarket: '#8b5cf6',
-  kalshi: '#3b82f6',
-  manifold: '#22c55e',
-  metaculus: '#f59e0b',
+  polymarket: '#2150ff', // Royal blue from Polymarket logo
+  kalshi: '#14b8a6', // Teal-green from Kalshi logo
+  manifold: '#8b5cf6', // Purple from Manifold crane logo
+  metaculus: '#4a5568', // Dark blue-grey from Metaculus logo (lighter for UI)
 };
 
 export default function PlatformLogo({ 
@@ -89,15 +61,30 @@ export default function PlatformLogo({
   className = '',
   linkToSite = false,
 }: PlatformLogoProps) {
-  const LogoComponent = logoComponents[platform];
   const color = platformColors[platform];
+  const logoPath = logoPaths[platform];
+  
+  // Calculate image dimensions based on size
+  const imageSizes: Record<PlatformLogoProps['size'], number> = {
+    sm: 16,
+    md: 20,
+    lg: 24,
+    xl: 32,
+  };
   
   const content = (
     <div 
       className={`inline-flex items-center gap-1.5 platform-logo ${className}`}
       style={{ color }}
     >
-      <LogoComponent className={sizeClasses[size]} />
+      <Image
+        src={logoPath}
+        alt={`${platformNames[platform]} logo`}
+        width={imageSizes[size]}
+        height={imageSizes[size]}
+        className={`${sizeClasses[size]} object-contain`}
+        unoptimized
+      />
       {showName && (
         <span className={`font-medium ${textSizes[size]}`} style={{ color }}>
           {platformNames[platform]}
@@ -130,14 +117,21 @@ export function PlatformBadge({
   showName = true,
   className = '',
 }: PlatformLogoProps) {
-  const LogoComponent = logoComponents[platform];
   const color = platformColors[platform];
+  const logoPath = logoPaths[platform];
   
   const paddingClasses = {
     sm: 'px-1.5 py-0.5',
     md: 'px-2 py-1',
     lg: 'px-3 py-1.5',
     xl: 'px-4 py-2',
+  };
+
+  const imageSizes: Record<PlatformLogoProps['size'], number> = {
+    sm: 16,
+    md: 20,
+    lg: 24,
+    xl: 32,
   };
 
   return (
@@ -149,7 +143,14 @@ export function PlatformBadge({
         border: `1px solid ${color}30`,
       }}
     >
-      <LogoComponent className={sizeClasses[size]} />
+      <Image
+        src={logoPath}
+        alt={`${platformNames[platform]} logo`}
+        width={imageSizes[size]}
+        height={imageSizes[size]}
+        className={`${sizeClasses[size]} object-contain`}
+        unoptimized
+      />
       {showName && <span>{platformNames[platform]}</span>}
     </div>
   );
@@ -161,14 +162,21 @@ export function PlatformIcon({
   size = 'md',
   className = '',
 }: Omit<PlatformLogoProps, 'showName' | 'linkToSite'>) {
-  const LogoComponent = logoComponents[platform];
   const color = platformColors[platform];
+  const logoPath = logoPaths[platform];
   
   const iconBgSizes = {
     sm: 'w-5 h-5',
     md: 'w-6 h-6',
     lg: 'w-8 h-8',
     xl: 'w-10 h-10',
+  };
+
+  const imageSizes: Record<PlatformLogoProps['size'], number> = {
+    sm: 16,
+    md: 20,
+    lg: 24,
+    xl: 32,
   };
 
   return (
@@ -180,7 +188,14 @@ export function PlatformIcon({
       }}
       title={platformNames[platform]}
     >
-      <LogoComponent className={sizeClasses[size]} />
+      <Image
+        src={logoPath}
+        alt={`${platformNames[platform]} logo`}
+        width={imageSizes[size]}
+        height={imageSizes[size]}
+        className={`${sizeClasses[size]} object-contain`}
+        unoptimized
+      />
     </div>
   );
 }

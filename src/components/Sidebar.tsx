@@ -21,19 +21,19 @@ interface SidebarProps {
 
 const platformConfig: Record<Platform, { color: string; description: string }> = {
   polymarket: {
-    color: '#8b5cf6',
+    color: '#2150ff', // Royal blue from Polymarket logo
     description: 'Real money predictions',
   },
   kalshi: {
-    color: '#3b82f6',
+    color: '#14b8a6', // Teal-green from Kalshi logo
     description: 'CFTC regulated exchange',
   },
   manifold: {
-    color: '#22c55e',
+    color: '#8b5cf6', // Purple from Manifold crane logo
     description: 'Play money markets',
   },
   metaculus: {
-    color: '#f59e0b',
+    color: '#4a5568', // Dark blue-grey from Metaculus logo
     description: 'Forecasting community',
   },
 };

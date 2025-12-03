@@ -10,6 +10,8 @@ interface MarketTableProps {
   onMarketClick?: (market: UnifiedMarket) => void;
   onSetAlert?: (market: UnifiedMarket) => void;
   hasArbitrage?: (marketId: string) => boolean;
+  isWatched?: (marketId: string) => boolean;
+  onToggleWatchlist?: (marketId: string) => void;
 }
 
 function formatVolume(volume: number, label: string): string {
@@ -50,9 +52,11 @@ interface MarketCardProps {
   onClick?: () => void;
   onSetAlert?: () => void;
   hasArbitrage?: boolean;
+  isWatched?: boolean;
+  onToggleWatchlist?: () => void;
 }
 
-function MarketCard({ market, searchQuery, onClick, onSetAlert, hasArbitrage }: MarketCardProps) {
+function MarketCard({ market, searchQuery, onClick, onSetAlert, hasArbitrage, isWatched, onToggleWatchlist }: MarketCardProps) {
   const isHighProb = market.probability >= 70;
   const isLowProb = market.probability <= 30;
 
@@ -130,6 +134,23 @@ function MarketCard({ market, searchQuery, onClick, onSetAlert, hasArbitrage }: 
 
                 {/* Quick actions */}
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {/* Watchlist star */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleWatchlist?.();
+                    }}
+                    className={`p-2 rounded-lg transition-all ${
+                      isWatched 
+                        ? 'text-ph-warning' 
+                        : 'text-ph-text-muted hover:text-ph-warning hover:bg-ph-hover'
+                    }`}
+                    title={isWatched ? "Remove from watchlist" : "Add to watchlist"}
+                  >
+                    <svg className="w-4 h-4" fill={isWatched ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                    </svg>
+                  </button>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -176,7 +197,9 @@ export default function MarketTable({
   searchQuery, 
   onMarketClick, 
   onSetAlert,
-  hasArbitrage 
+  hasArbitrage,
+  isWatched,
+  onToggleWatchlist,
 }: MarketTableProps) {
   if (markets.length === 0) {
     return (
@@ -228,6 +251,8 @@ export default function MarketTable({
             onClick={() => onMarketClick?.(market)}
             onSetAlert={() => onSetAlert?.(market)}
             hasArbitrage={hasArbitrage?.(market.id)}
+            isWatched={isWatched?.(market.id)}
+            onToggleWatchlist={() => onToggleWatchlist?.(market.id)}
           />
         ))}
       </div>

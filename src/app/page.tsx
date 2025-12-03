@@ -10,7 +10,9 @@ import {
 import Sidebar from '@/components/Sidebar';
 import MobileNav from '@/components/MobileNav';
 import MarketTable from '@/components/MarketTable';
-import FilterBar, { SortField, SortDirection } from '@/components/FilterBar';
+import FilterBar, { SortField, SortDirection, ViewMode } from '@/components/FilterBar';
+import { EventGroupGrid } from '@/components/EventGroupCard';
+import { groupMarketsByEvent } from '@/utils/grouping';
 import Portfolio from '@/components/Portfolio';
 import QuickStats from '@/components/QuickStats';
 import TrendingSection from '@/components/TrendingSection';
@@ -22,6 +24,8 @@ import PremiumBanner from '@/components/PremiumBanner';
 import AdvancedFilters, { FilterState } from '@/components/AdvancedFilters';
 import AlertsPanel from '@/components/AlertsPanel';
 import PlatformLogo from '@/components/PlatformLogo';
+import WatchlistView from '@/components/WatchlistView';
+import { useWatchlist } from '@/hooks/useWatchlist';
 import { findArbitrageOpportunities, ArbitrageOpportunity } from '@/utils/arbitrage';
 
 const ALL_PLATFORMS: Platform[] = ['polymarket', 'kalshi', 'manifold', 'metaculus'];
@@ -56,7 +60,13 @@ export default function Home() {
   const [activeCategory, setActiveCategory] = useState<Category | 'all'>('all');
   const [sortField, setSortField] = useState<SortField>('volume');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
-  const [activeTab, setActiveTab] = useState<'markets' | 'portfolio'>('markets');
+  const [activeTab, setActiveTab] = useState<'markets' | 'portfolio' | 'watchlist'>('markets');
+
+  // Watchlist
+  const { watchlist, watchlistCount, isWatched, toggleWatchlist, clearWatchlist } = useWatchlist();
+
+  // View mode
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
 
   // Advanced filters
   const [advancedFilters, setAdvancedFilters] = useState<FilterState>({
@@ -346,6 +356,11 @@ useEffect(() => {
       .slice(0, 5);
   }, [selectedMarket, allMarkets]);
 
+  // Group markets by event
+  const groupedMarkets = useMemo(() => {
+    return groupMarketsByEvent(filteredMarkets, 0.4);
+  }, [filteredMarkets]);
+
   // Check if market has arbitrage opportunity
   const hasArbitrage = useCallback((marketId: string) => {
     return arbitrageOpportunities.some(opp => 
@@ -371,6 +386,7 @@ useEffect(() => {
         totalMarkets={allMarkets.length}
         activeTab={activeTab}
         onTabChange={setActiveTab}
+        watchlistCount={watchlistCount}
         advancedFilters={
           <AdvancedFilters
             filters={advancedFilters}
@@ -393,6 +409,7 @@ useEffect(() => {
         totalMarkets={allMarkets.length}
         activeTab={activeTab}
         onTabChange={setActiveTab}
+        watchlistCount={watchlistCount}
       />
 
       {/* Main Content */}
@@ -422,6 +439,8 @@ useEffect(() => {
                   sortDirection={sortDirection}
                   onSortChange={handleSortChange}
                   marketCounts={categoryCounts}
+                  viewMode={viewMode}
+                  onViewModeChange={setViewMode}
                 />
               </>
             )}
@@ -454,13 +473,21 @@ useEffect(() => {
                 />
               )}
 
-              {/* Markets Table */}
+              {/* Markets Table or Grouped View */}
               {isAnyLoading && allMarkets.length === 0 ? (
                 <div className="space-y-3">
                   {Array.from({ length: 8 }).map((_, i) => (
                     <div key={i} className="shimmer h-24 rounded-xl" />
                   ))}
                 </div>
+              ) : viewMode === 'grouped' ? (
+                <EventGroupGrid
+                  groups={groupedMarkets}
+                  onMarketClick={setSelectedMarket}
+                  onSetAlert={setAlertMarket}
+                  isWatched={isWatched}
+                  onToggleWatchlist={toggleWatchlist}
+                />
               ) : (
                 <MarketTable 
                   markets={filteredMarkets}
@@ -468,9 +495,22 @@ useEffect(() => {
                   onMarketClick={setSelectedMarket}
                   onSetAlert={setAlertMarket}
                   hasArbitrage={hasArbitrage}
+                  isWatched={isWatched}
+                  onToggleWatchlist={toggleWatchlist}
                 />
               )}
             </>
+          ) : activeTab === 'watchlist' ? (
+            <WatchlistView
+              markets={allMarkets}
+              watchlist={watchlist}
+              onMarketClick={setSelectedMarket}
+              onSetAlert={setAlertMarket}
+              hasArbitrage={hasArbitrage}
+              isWatched={isWatched}
+              onToggleWatchlist={toggleWatchlist}
+              onClearWatchlist={clearWatchlist}
+            />
           ) : (
             <Portfolio />
           )}

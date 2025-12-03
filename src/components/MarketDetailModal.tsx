@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { UnifiedMarket, categoryLabels } from '@/types/market';
 import { PlatformBadge, platformColors } from './PlatformLogo';
+import PriceChart from './PriceChart';
 
 interface MarketDetailModalProps {
   market: UnifiedMarket | null;
@@ -18,6 +19,8 @@ export default function MarketDetailModal({
   onSetAlert 
 }: MarketDetailModalProps) {
   const [copied, setCopied] = useState(false);
+  const [showEmbed, setShowEmbed] = useState(false);
+  const [embedCopied, setEmbedCopied] = useState(false);
 
   // Close on escape key
   useEffect(() => {
@@ -147,6 +150,15 @@ export default function MarketDetailModal({
           </div>
         </div>
 
+        {/* Price Chart */}
+        <div className="p-6 border-b border-subtle">
+          <PriceChart 
+            marketId={market.id}
+            platform={market.platform}
+            currentProbability={market.probability}
+          />
+        </div>
+
         {/* Stats */}
         <div className="p-6 border-b border-subtle">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -200,6 +212,40 @@ export default function MarketDetailModal({
           </div>
         )}
 
+        {/* Embed Code Section */}
+        {showEmbed && (
+          <div className="p-6 border-b border-subtle bg-ph-bg/50">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold text-ph-text-secondary">Embed Code</h3>
+              <button
+                onClick={() => setShowEmbed(false)}
+                className="text-ph-text-muted hover:text-ph-text text-sm"
+              >
+                Close
+              </button>
+            </div>
+            <div className="bg-ph-card rounded-lg p-3 border border-subtle">
+              <code className="text-xs text-ph-text-secondary break-all">
+                {`<iframe src="${typeof window !== 'undefined' ? window.location.origin : ''}/embed/${market.id}" width="100%" height="180" frameborder="0" style="border-radius: 12px;"></iframe>`}
+              </code>
+            </div>
+            <button
+              onClick={() => {
+                const embedCode = `<iframe src="${typeof window !== 'undefined' ? window.location.origin : ''}/embed/${market.id}" width="100%" height="180" frameborder="0" style="border-radius: 12px;"></iframe>`;
+                navigator.clipboard.writeText(embedCode);
+                setEmbedCopied(true);
+                setTimeout(() => setEmbedCopied(false), 2000);
+              }}
+              className="mt-3 w-full py-2 bg-ph-primary text-white text-sm font-medium rounded-lg hover:bg-ph-primary/90 transition-colors"
+            >
+              {embedCopied ? '✓ Copied!' : 'Copy Embed Code'}
+            </button>
+            <p className="mt-2 text-xs text-ph-text-muted text-center">
+              Add ?theme=light for light mode
+            </p>
+          </div>
+        )}
+
         {/* Actions */}
         <div className="p-6 flex flex-col sm:flex-row gap-3">
           <a
@@ -222,6 +268,14 @@ export default function MarketDetailModal({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
             Set Alert
+          </button>
+
+          <button
+            onClick={() => setShowEmbed(!showEmbed)}
+            className="px-6 py-3.5 bg-ph-hover hover:bg-ph-bg text-ph-text rounded-xl font-bold transition-all border border-subtle"
+            title="Get embed code"
+          >
+            &lt;/&gt;
           </button>
 
           <button

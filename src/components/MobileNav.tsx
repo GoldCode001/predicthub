@@ -11,8 +11,9 @@ interface MobileNavProps {
   platformStatus: Record<Platform, PlatformStatus>;
   onToggle: (platform: Platform) => void;
   totalMarkets: number;
-  activeTab: 'markets' | 'portfolio';
-  onTabChange: (tab: 'markets' | 'portfolio') => void;
+  activeTab: 'markets' | 'portfolio' | 'watchlist';
+  onTabChange: (tab: 'markets' | 'portfolio' | 'watchlist') => void;
+  watchlistCount?: number;
 }
 
 export default function MobileNav({
@@ -23,6 +24,7 @@ export default function MobileNav({
   totalMarkets,
   activeTab,
   onTabChange,
+  watchlistCount = 0,
 }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -56,7 +58,7 @@ export default function MobileNav({
       <div className="flex gap-1 px-4 pb-3">
         <button
           onClick={() => onTabChange('markets')}
-          className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all ${
+          className={`flex-1 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all ${
             activeTab === 'markets'
               ? 'bg-ph-hover text-ph-text'
               : 'text-ph-text-secondary'
@@ -65,8 +67,23 @@ export default function MobileNav({
           Markets
         </button>
         <button
+          onClick={() => onTabChange('watchlist')}
+          className={`flex-1 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all relative ${
+            activeTab === 'watchlist'
+              ? 'bg-ph-hover text-ph-text'
+              : 'text-ph-text-secondary'
+          }`}
+        >
+          Watchlist
+          {watchlistCount > 0 && (
+            <span className="absolute -top-1 -right-1 bg-ph-primary text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+              {watchlistCount}
+            </span>
+          )}
+        </button>
+        <button
           onClick={() => onTabChange('portfolio')}
-          className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all ${
+          className={`flex-1 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all ${
             activeTab === 'portfolio'
               ? 'bg-ph-hover text-ph-text'
               : 'text-ph-text-secondary'

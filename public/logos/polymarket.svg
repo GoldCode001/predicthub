@@ -1,16 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
-  <!-- Blue circular background -->
+  <!-- Royal blue circular background (#2150ff) -->
   <circle cx="60" cy="60" r="60" fill="#2150ff"/>
-  <!-- White geometric symbol (stacked V's) -->
-  <g fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
-    <!-- Left vertical bar -->
-    <line x1="35" y1="25" x2="35" y2="95"/>
-    <!-- Top V -->
-    <path d="M35 35 L50 25 L65 35"/>
-    <!-- Middle V -->
-    <path d="M35 60 L50 50 L65 60"/>
-    <!-- Bottom V -->
-    <path d="M35 85 L50 75 L65 85"/>
+  <!-- White geometric symbol - thick lines, stacked V shapes pointing right -->
+  <g fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Left vertical anchor bar -->
+    <line x1="30" y1="18" x2="30" y2="102"/>
+    <!-- Top V - extends right and slightly up, then down and right -->
+    <path d="M 30 30 L 46 18 L 62 30"/>
+    <!-- Middle V - extends horizontally right, then down and right -->
+    <path d="M 30 60 L 46 48 L 62 60"/>
+    <!-- Bottom V - extends right and slightly down, then up and right -->
+    <path d="M 30 90 L 46 78 L 62 90"/>
   </g>
 </svg>
-

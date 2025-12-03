@@ -414,9 +414,9 @@ useEffect(() => {
       />
 
       {/* Main Content */}
-      <main className="lg:ml-[280px] min-h-screen">
+      <main className="lg:ml-[280px] min-h-screen relative z-0">
         {/* Top Bar */}
-        <div className="sticky top-0 z-40 bg-ph-bg/95 backdrop-blur-sm border-b border-subtle pt-[60px] lg:pt-0">
+        <div className="sticky top-0 z-30 bg-ph-bg/95 backdrop-blur-sm border-b border-subtle pt-[60px] lg:pt-0">
           <div className="px-4 lg:px-6 py-4">
             {activeTab === 'markets' && (
               <>

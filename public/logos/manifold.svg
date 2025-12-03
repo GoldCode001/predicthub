@@ -1,23 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
-  <!-- White background -->
-  <rect width="120" height="120" fill="#ffffff"/>
-  <!-- Purple origami crane outline -->
+  <!-- White background with rounded corners -->
+  <rect width="120" height="120" rx="16" fill="#ffffff"/>
+  <!-- Purple origami crane outline - geometric, angular, facing left -->
   <g fill="none" stroke="#8b5cf6" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-    <!-- Head and neck -->
-    <path d="M30 50 L40 35 L35 30"/>
-    <!-- Upper wing peaks -->
-    <path d="M40 35 L55 25 L70 30"/>
-    <path d="M55 25 L60 20 L65 25"/>
-    <!-- Body segments -->
-    <path d="M40 35 L45 50 L50 45"/>
-    <path d="M50 45 L55 60 L60 55"/>
-    <path d="M60 55 L65 70 L70 65"/>
-    <!-- Lower body -->
-    <path d="M55 60 L50 75 L45 70"/>
-    <!-- Tail -->
-    <path d="M45 70 L35 85 L30 80"/>
-    <!-- Internal fold line -->
-    <path d="M50 60 L55 65" stroke-width="2"/>
+    <!-- Head and beak pointing left/up -->
+    <path d="M 22 48 L 32 32 L 28 25"/>
+    <!-- Upper wing with two distinct sharp peaks -->
+    <path d="M 32 32 L 48 18 L 64 25"/>
+    <path d="M 48 18 L 54 10 L 60 18"/>
+    <!-- Body with trapezoidal segments -->
+    <path d="M 32 32 L 40 48 L 46 40"/>
+    <path d="M 46 40 L 54 58 L 60 50"/>
+    <path d="M 60 50 L 66 68 L 72 60"/>
+    <!-- Lower body segment -->
+    <path d="M 54 58 L 48 78 L 42 70"/>
+    <!-- Tail extending right -->
+    <path d="M 42 70 L 30 92 L 24 86"/>
+    <!-- Internal fold line (horizontal segment in lower body) -->
+    <path d="M 48 70 L 54 75" stroke-width="2.5"/>
   </g>
 </svg>
-

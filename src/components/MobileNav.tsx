@@ -30,7 +30,7 @@ export default function MobileNav({
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="lg:hidden fixed top-0 left-0 right-0 bg-ph-card/95 backdrop-blur-sm border-b border-subtle z-50">
+    <div className="lg:hidden fixed top-0 left-0 right-0 bg-ph-card/95 backdrop-blur-sm border-b border-subtle z-[50]">
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center">
@@ -102,10 +102,10 @@ export default function MobileNav({
       {isOpen && (
         <>
           <div 
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[99]"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998]"
             onClick={() => setIsOpen(false)}
           />
-          <div className="fixed right-0 top-0 h-full w-80 bg-ph-card border-l border-subtle z-[100] overflow-y-auto animate-fadeIn">
+          <div className="fixed right-0 top-0 h-full w-80 bg-ph-card border-l border-subtle z-[9999] overflow-y-auto animate-fadeIn">
             <div className="p-4 border-b border-subtle flex items-center justify-between">
               <span className="font-bold text-ph-text">Filters</span>
               <button 

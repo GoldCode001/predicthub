@@ -82,7 +82,7 @@ export default function PlatformLogo({
         alt={`${platformNames[platform]} logo`}
         width={imageSizes[size]}
         height={imageSizes[size]}
-        className={`${sizeClasses[size]} object-contain`}
+        className={`${sizeClasses[size]} object-contain rounded-md`}
         unoptimized
       />
       {showName && (
@@ -136,7 +136,7 @@ export function PlatformBadge({
 
   return (
     <div 
-      className={`inline-flex items-center gap-1.5 rounded-lg font-medium ${paddingClasses[size]} ${textSizes[size]} ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-xl font-medium ${paddingClasses[size]} ${textSizes[size]} ${className}`}
       style={{ 
         backgroundColor: `${color}15`,
         color,
@@ -148,7 +148,7 @@ export function PlatformBadge({
         alt={`${platformNames[platform]} logo`}
         width={imageSizes[size]}
         height={imageSizes[size]}
-        className={`${sizeClasses[size]} object-contain`}
+        className={`${sizeClasses[size]} object-contain rounded-md`}
         unoptimized
       />
       {showName && <span>{platformNames[platform]}</span>}
@@ -181,7 +181,7 @@ export function PlatformIcon({
 
   return (
     <div 
-      className={`${iconBgSizes[size]} rounded-lg flex items-center justify-center ${className}`}
+      className={`${iconBgSizes[size]} rounded-xl flex items-center justify-center overflow-hidden ${className}`}
       style={{ 
         backgroundColor: `${color}20`,
         color,
@@ -193,7 +193,7 @@ export function PlatformIcon({
         alt={`${platformNames[platform]} logo`}
         width={imageSizes[size]}
         height={imageSizes[size]}
-        className={`${sizeClasses[size]} object-contain`}
+        className={`${sizeClasses[size]} object-contain rounded-md`}
         unoptimized
       />
     </div>

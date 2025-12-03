@@ -9,6 +9,14 @@ interface WalletState {
   error: string | null;
 }
 
+interface WalletApp {
+  name: string;
+  icon: string;
+  deepLink: string;
+  downloadLink: string;
+  isInstalled?: boolean;
+}
+
 // Store wallet state globally so Portfolio can access it
 let globalWalletState: WalletState = {
   address: null,
@@ -46,6 +54,56 @@ export default function WalletButton() {
   const [wallet, setWallet] = useState<WalletState>(globalWalletState);
   const [showMenu, setShowMenu] = useState(false);
   const [hasMetaMask, setHasMetaMask] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [walletApps, setWalletApps] = useState<WalletApp[]>([]);
+
+  // Detect mobile device and wallet apps
+  useEffect(() => {
+    const checkMobile = () => {
+      const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+      const mobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent.toLowerCase());
+      setIsMobile(mobile);
+      
+      if (mobile) {
+        // Popular mobile wallet apps with deep links
+        const apps: WalletApp[] = [
+          {
+            name: 'MetaMask',
+            icon: '🦊',
+            deepLink: 'metamask://wc?uri=',
+            downloadLink: 'https://metamask.app.link/dapp',
+          },
+          {
+            name: 'Coinbase Wallet',
+            icon: '🔷',
+            deepLink: 'cbwallet://wc?uri=',
+            downloadLink: 'https://www.coinbase.com/wallet',
+          },
+          {
+            name: 'Trust Wallet',
+            icon: '🔐',
+            deepLink: 'trust://wc?uri=',
+            downloadLink: 'https://trustwallet.com/download',
+          },
+          {
+            name: 'Rainbow',
+            icon: '🌈',
+            deepLink: 'rainbow://wc?uri=',
+            downloadLink: 'https://rainbow.me',
+          },
+          {
+            name: 'Zerion',
+            icon: '💼',
+            deepLink: 'zerion://wc?uri=',
+            downloadLink: 'https://link.zerion.io/referral?code=19NY21O03',
+          },
+        ];
+        setWalletApps(apps);
+      }
+    };
+    
+    checkMobile();
+  }, []);
 
   // Check for MetaMask on mount
   useEffect(() => {
@@ -91,6 +149,26 @@ export default function WalletButton() {
     };
 
     checkMetaMask();
+  }, []);
+
+  const openWalletApp = useCallback((app: WalletApp) => {
+    // Try to open the wallet app via deep link
+    const deepLink = app.deepLink;
+    const fallbackUrl = app.downloadLink;
+    
+    // Create a hidden iframe to attempt deep link
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = deepLink;
+    document.body.appendChild(iframe);
+    
+    // Fallback to download page after a short delay
+    setTimeout(() => {
+      document.body.removeChild(iframe);
+      window.open(fallbackUrl, '_blank');
+    }, 2000);
+    
+    setShowMenu(false);
   }, []);
 
   const connect = useCallback(async () => {
@@ -200,8 +278,59 @@ export default function WalletButton() {
         </button>
 
         {showMenu && (
-          <div className="absolute left-0 right-0 mt-2 bg-ph-card border border-subtle rounded-xl shadow-card z-50 overflow-hidden">
-            {hasMetaMask ? (
+          <div className="absolute left-0 right-0 mt-2 bg-ph-card border border-subtle rounded-xl shadow-card z-[9999] overflow-hidden">
+            {isMobile && walletApps.length > 0 ? (
+              <>
+                <div className="p-4 border-b border-subtle">
+                  <p className="text-xs font-semibold text-ph-text-muted uppercase tracking-wider mb-3">Connect with Wallet App</p>
+                  <div className="space-y-2">
+                    {walletApps.map((app) => (
+                      <button
+                        key={app.name}
+                        onClick={() => openWalletApp(app)}
+                        className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-ph-hover transition-colors text-left border border-subtle hover:border-ph-primary/30"
+                      >
+                        <span className="text-2xl">{app.icon}</span>
+                        <div className="flex-1">
+                          <div className="text-sm font-semibold text-ph-text">{app.name}</div>
+                          <div className="text-xs text-ph-text-muted">Tap to open app</div>
+                        </div>
+                        <svg className="w-4 h-4 text-ph-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {hasMetaMask && (
+                  <div className="p-4 border-t border-subtle">
+                    <button
+                      onClick={connect}
+                      className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-ph-hover transition-colors text-left border border-subtle hover:border-ph-primary/30"
+                    >
+                      <span className="text-2xl">🌐</span>
+                      <div className="flex-1">
+                        <div className="text-sm font-semibold text-ph-text">Browser Wallet</div>
+                        <div className="text-xs text-ph-text-muted">MetaMask, Coinbase, Rabby, etc.</div>
+                      </div>
+                    </button>
+                  </div>
+                )}
+                <div className="p-4 border-t border-subtle">
+                  <a
+                    href="https://link.zerion.io/referral?code=19NY21O03"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-center text-sm text-ph-primary hover:underline font-medium"
+                  >
+                    Don't have a wallet? Install one →
+                  </a>
+                </div>
+                {wallet.error && (
+                  <div className="px-4 pb-4 text-xs text-ph-loss">{wallet.error}</div>
+                )}
+              </>
+            ) : hasMetaMask ? (
               <>
                 <button
                   onClick={connect}

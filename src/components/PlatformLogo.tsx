@@ -40,10 +40,10 @@ const textSizes = {
 };
 
 const logoPaths: Record<Platform, string> = {
-  polymarket: '/logos/polymarket.svg',
-  kalshi: '/logos/kalshi.svg',
-  manifold: '/logos/manifold.svg',
-  metaculus: '/logos/metaculus.svg',
+  polymarket: '/logos/polymarket.png',
+  kalshi: '/logos/kalshi.png',
+  manifold: '/logos/manifold.png',
+  metaculus: '/logos/metaculus.png',
 };
 
 // Updated theme colors based on actual logos

@@ -175,3 +175,4 @@ export function getUngroupedMarkets(groups: EventGroup[]): UnifiedMarket[] {
     .map(g => g.markets[0]);
 }
 
+

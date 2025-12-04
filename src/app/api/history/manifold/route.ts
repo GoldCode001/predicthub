@@ -179,3 +179,4 @@ function generateMockHistory(currentPrice: number, range: string): HistoryPoint[
   return history.sort((a, b) => a.time - b.time);
 }
 
+

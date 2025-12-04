@@ -240,3 +240,4 @@ export default function EmbedWidget({ marketId, theme = 'dark' }: EmbedWidgetPro
   );
 }
 
+

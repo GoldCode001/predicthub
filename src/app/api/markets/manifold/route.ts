@@ -59,6 +59,7 @@ export async function GET() {
           url,
           imageUrl: market.coverImageUrl,
           isPlayMoney: true,
+          historyId: market.id,
         };
       } catch (e) {
         console.error('[Manifold] Parse error:', e);

@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+const POLYMARKET_API = 'https://gamma-api.polymarket.com/markets';
+
 interface HistoryPoint {
   time: number;
   value: number;
@@ -7,14 +9,23 @@ interface HistoryPoint {
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const marketId = searchParams.get('id');
+  const rawMarketId = searchParams.get('id');
   const range = searchParams.get('range') || '7d';
 
-  if (!marketId) {
+  if (!rawMarketId) {
     return NextResponse.json({ error: 'Market ID is required', history: [] });
   }
 
   try {
+    const resolvedId = await resolvePolymarketToken(rawMarketId);
+
+    if (!resolvedId) {
+      return NextResponse.json({
+        error: 'Unable to resolve Polymarket market identifier',
+        history: [],
+      });
+    }
+
     // Calculate time range
     const now = Date.now();
     let startTime: number;
@@ -38,7 +49,7 @@ export async function GET(request: Request) {
 
     // Try to fetch from Polymarket CLOB API
     // The CLOB API has a /prices/history endpoint
-    const clobUrl = `https://clob.polymarket.com/prices-history?market=${encodeURIComponent(marketId)}&startTs=${Math.floor(startTime / 1000)}&endTs=${Math.floor(now / 1000)}&fidelity=60`;
+    const clobUrl = `https://clob.polymarket.com/prices-history?market=${encodeURIComponent(resolvedId)}&startTs=${Math.floor(startTime / 1000)}&endTs=${Math.floor(now / 1000)}&fidelity=60`;
     
     console.log(`[Polymarket History] Fetching from: ${clobUrl}`);
     
@@ -52,7 +63,7 @@ export async function GET(request: Request) {
 
     if (!response.ok) {
       // Fallback: try the gamma API
-      const gammaUrl = `https://gamma-api.polymarket.com/markets/${encodeURIComponent(marketId)}`;
+      const gammaUrl = `${POLYMARKET_API}/${encodeURIComponent(rawMarketId)}`;
       console.log(`[Polymarket History] CLOB failed, trying gamma: ${gammaUrl}`);
       
       const gammaResponse = await fetch(gammaUrl, {
@@ -150,5 +161,55 @@ function generateMockHistory(currentPrice: number, range: string): HistoryPoint[
   history[history.length - 1].value = currentPrice;
   
   return history.sort((a, b) => a.time - b.time);
+}
+
+function isLikelyClobToken(id: string) {
+  return id.length > 40;
+}
+
+async function resolvePolymarketToken(identifier: string): Promise<string | null> {
+  if (!identifier) return null;
+  if (isLikelyClobToken(identifier)) return identifier;
+
+  const market = await fetchPolymarketMarket(identifier);
+  if (!market) return null;
+
+  return extractFirstTokenId(market.clobTokenIds);
+}
+
+async function fetchPolymarketMarket(identifier: string): Promise<any | null> {
+  try {
+    const byId = await fetch(`${POLYMARKET_API}/${encodeURIComponent(identifier)}`, {
+      headers: { 'Accept': 'application/json', 'User-Agent': 'PredictHub/1.0' },
+      next: { revalidate: 300 },
+    });
+    if (byId.ok) return byId.json();
+  } catch {}
+
+  try {
+    const bySlug = await fetch(`${POLYMARKET_API}?slug=${encodeURIComponent(identifier)}&limit=1`, {
+      headers: { 'Accept': 'application/json', 'User-Agent': 'PredictHub/1.0' },
+      next: { revalidate: 300 },
+    });
+    if (bySlug.ok) {
+      const data = await bySlug.json();
+      if (Array.isArray(data) && data.length > 0) {
+        return data[0];
+      }
+    }
+  } catch {}
+
+  return null;
+}
+
+function extractFirstTokenId(ids: any): string | null {
+  if (!ids) return null;
+  try {
+    const parsed = typeof ids === 'string' ? JSON.parse(ids) : ids;
+    if (Array.isArray(parsed) && parsed.length > 0 && typeof parsed[0] === 'string') {
+      return parsed[0];
+    }
+  } catch {}
+  return null;
 }
 

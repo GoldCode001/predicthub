@@ -24,6 +24,7 @@ export interface UnifiedMarket {
   url: string;
   imageUrl?: string;
   isPlayMoney: boolean;
+  historyId?: string;
 }
 
 export interface PlatformStatus {

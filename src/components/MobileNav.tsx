@@ -1,7 +1,8 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Platform, platformNames, PlatformStatus } from '@/types/market';
 import WalletButton from './WalletButton';
 import { PlatformIcon } from './PlatformLogo';
@@ -28,6 +29,23 @@ export default function MobileNav({
   watchlistCount = 0,
 }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMounted, isOpen]);
 
   return (
     <div className="lg:hidden fixed top-0 left-0 right-0 bg-ph-card/95 backdrop-blur-sm border-b border-subtle z-[1200]">
@@ -99,13 +117,13 @@ export default function MobileNav({
       </div>
 
       {/* Slide-out panel */}
-      {isOpen && (
+      {isMounted && isOpen && createPortal(
         <>
           <div 
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[2000]"
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[5000]"
             onClick={() => setIsOpen(false)}
           />
-          <div className="fixed right-0 top-0 h-full w-80 bg-ph-card border-l border-subtle z-[2001] overflow-y-auto animate-fadeIn shadow-2xl">
+          <div className="fixed right-0 top-0 h-full w-80 bg-ph-card border-l border-subtle z-[5001] overflow-y-auto animate-fadeIn shadow-2xl">
             <div className="p-4 border-b border-subtle flex items-center justify-between">
               <span className="font-bold text-ph-text">Filters</span>
               <button 
@@ -174,7 +192,8 @@ export default function MobileNav({
               </div>
             </div>
           </div>
-        </>
+        </>,
+        document.body
       )}
     </div>
   );

@@ -64,6 +64,7 @@ export async function GET() {
             endDate: item.scheduled_close_time || null,
             url: `https://www.metaculus.com/questions/${item.id}/${slug}/`,
             isPlayMoney: true,
+            historyId: item.id?.toString(),
           };
         } catch (e) {
           console.error('[Metaculus] Parse error:', e);

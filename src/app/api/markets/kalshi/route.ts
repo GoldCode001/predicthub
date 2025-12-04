@@ -111,6 +111,7 @@ export async function GET() {
           endDate: mainMarket.close_time || mainMarket.expiration_time || null,
           url: `https://kalshi.com/markets/${seriesTicker}`,
           isPlayMoney: false,
+          historyId: mainMarket.ticker,
         };
       } catch (e) {
         return null;

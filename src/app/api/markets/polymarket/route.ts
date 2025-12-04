@@ -46,6 +46,16 @@ export async function GET() {
           const volume = market.volumeNum || parseFloat(market.volume) || 0;
           if (!market.question || volume <= 0) return null;
 
+          let historyId: string | undefined;
+          try {
+            const tokenIds = JSON.parse(market.clobTokenIds || '[]');
+            if (Array.isArray(tokenIds) && tokenIds.length > 0) {
+              historyId = tokenIds[0];
+            }
+          } catch {
+            // ignore
+          }
+
           // Get the event slug from the events array - this is the correct permalink
           // Polymarket URLs use: https://polymarket.com/event/{event_slug}
           let eventSlug = market.slug; // fallback to market slug
@@ -70,6 +80,7 @@ export async function GET() {
             url,
             imageUrl: market.image,
             isPlayMoney: false,
+            historyId,
           };
         } catch (e) {
           console.error('[Polymarket] Parse error:', e);

@@ -7,6 +7,7 @@ interface PriceChartProps {
   marketId: string;
   platform: Platform;
   currentProbability: number;
+  historyId?: string;
 }
 
 interface HistoryPoint {
@@ -16,7 +17,7 @@ interface HistoryPoint {
 
 type TimeRange = '24h' | '7d' | '30d' | 'all';
 
-export default function PriceChart({ marketId, platform, currentProbability }: PriceChartProps) {
+export default function PriceChart({ marketId, platform, currentProbability, historyId }: PriceChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<any>(null);
   const seriesRef = useRef<any>(null);
@@ -33,9 +34,17 @@ export default function PriceChart({ marketId, platform, currentProbability }: P
       setError(null);
       
       try {
-        // Extract the original market ID without the platform prefix
-        const originalId = marketId.replace(`${platform}-`, '');
-        const response = await fetch(`/api/history/${platform}?id=${encodeURIComponent(originalId)}&range=${timeRange}`);
+        let normalizedId = historyId;
+        if (!normalizedId) {
+          const prefix = `${platform}-`;
+          normalizedId = marketId.startsWith(prefix) ? marketId.replace(prefix, '') : marketId;
+        }
+
+        if (!normalizedId) {
+          throw new Error('Missing market identifier');
+        }
+
+        const response = await fetch(`/api/history/${platform}?id=${encodeURIComponent(normalizedId)}&range=${timeRange}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch history');
@@ -58,7 +67,7 @@ export default function PriceChart({ marketId, platform, currentProbability }: P
     };
 
     fetchHistory();
-  }, [marketId, platform, timeRange]);
+  }, [marketId, platform, timeRange, historyId]);
 
   // Initialize and update chart
   useEffect(() => {

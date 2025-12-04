@@ -156,6 +156,7 @@ export default function MarketDetailModal({
             marketId={market.id}
             platform={market.platform}
             currentProbability={market.probability}
+            historyId={market.historyId}
           />
         </div>
 
